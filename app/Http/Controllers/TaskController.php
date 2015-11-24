@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Task;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -16,7 +17,8 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        //1. No és retorna: paginació
+        return Task::all();
     }
 
     /**
@@ -37,7 +39,9 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $task = new Task();
+
+        $this->saveTask($request, $task);
     }
 
     /**
@@ -48,7 +52,11 @@ class TaskController extends Controller
      */
     public function show($id)
     {
-        //
+        return $task = Task::findOrFail($id);
+
+        //or
+
+        //$task = Task::where('id', $id)->first();
     }
 
     /**
@@ -71,7 +79,9 @@ class TaskController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $task = Task::finOrFail($id);
+
+        $this->saveTask($request, $task);
     }
 
     /**
@@ -82,6 +92,18 @@ class TaskController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Task::destroy($id);
+    }
+
+    /**
+     * @param Request $request
+     * @param $task
+     */
+    public function saveTask(Request $request, $task)
+    {
+        $task->name = $request->name;
+        $task->done = $request->done;
+        $task->priority = $request->priority;
+        $task->save();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Tag;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -16,7 +17,8 @@ class TagController extends Controller
      */
     public function index()
     {
-        //
+        //1. No és retorna: paginació
+        return Tag::all();
     }
 
     /**
@@ -37,7 +39,9 @@ class TagController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $tag = new Tag();
+
+        $this->saveTag($request, $tag);
     }
 
     /**
@@ -48,7 +52,12 @@ class TagController extends Controller
      */
     public function show($id)
     {
-        //
+
+        return $tag = Tag::findOrFail($id);
+
+        //or
+
+        //$tag = Tag::where('id', $id)->first();
     }
 
     /**
@@ -71,7 +80,9 @@ class TagController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $tag = Tag::findOrFail($id);
+
+        $this->saveTag($request, $tag);
     }
 
     /**
@@ -82,6 +93,16 @@ class TagController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Tag::destroy($id);
+    }
+
+    /**
+     * @param Request $request
+     * @param $tag
+     */
+    public function saveTag(Request $request, $tag)
+    {
+        $tag->name = $request->name;
+        $tag->save();
     }
 }
