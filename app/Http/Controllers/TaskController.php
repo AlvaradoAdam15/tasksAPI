@@ -21,9 +21,9 @@ class TaskController extends Controller
         //1. No és retorna: paginació
         //return Task::all();
 
-        $tasks = Task::all();
+        $task = Task::all();
         return Response::json([
-            'data' => $tasks->toArray()
+            'data' => $this->transform($task)
         ],200);
     }
 
@@ -123,5 +123,19 @@ class TaskController extends Controller
         $task->done = $request->done;
         $task->priority = $request->priority;
         $task->save();
+    }
+
+    private function transform($task)
+    {
+        return array_map(function($task){
+
+            return [
+                'name' => $task['name'],
+                'some_bool' => $task['done'],
+                'priority' => $task['priority'],
+
+            ];
+
+        }, $task->toArray());
     }
 }
