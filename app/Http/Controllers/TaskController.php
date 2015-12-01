@@ -23,8 +23,8 @@ class TaskController extends Controller
 
         $task = Task::all();
         return Response::json([
-            'data' => $this->transform($task)
-        ],200);
+            'data' => $this->transformCollection($task)
+        ], 200);
     }
 
     /**
@@ -40,7 +40,7 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -53,14 +53,14 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
         $task = Task::find($id);
 
-        if (! $task) {
+        if (!$task) {
             return Response::json([
                 'error' => [
                     'message' => 'Task does not exsist'
@@ -69,8 +69,8 @@ class TaskController extends Controller
         }
 
         return Response::json([
-            'data' => $task->toArray()
-        ],200);
+            'data' => $this->transform($task)
+        ], 200);
 
         //or
 
@@ -80,7 +80,7 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -91,8 +91,8 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -105,7 +105,7 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -125,17 +125,19 @@ class TaskController extends Controller
         $task->save();
     }
 
+    private function transformCollection($task)
+    {
+        return array_map([$this, 'transform'], $task->toArray());
+    }
+
     private function transform($task)
     {
-        return array_map(function($task){
 
-            return [
-                'name' => $task['name'],
-                'some_bool' => $task['done'],
-                'priority' => $task['priority'],
+        return [
+            'name' => $task['name'],
+            'some_bool' => $task['done'],
+            'priority' => (boolean) $task['priority'],
 
-            ];
-
-        }, $task->toArray());
+        ];
     }
 }
