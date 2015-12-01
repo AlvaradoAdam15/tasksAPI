@@ -68,6 +68,10 @@ class TaskController extends Controller
             ], 404);
         }
 
+        return Response::json([
+            'data' => $task->toArray()
+        ],200);
+
         //or
 
         //$task = Task::where('id', $id)->first();
