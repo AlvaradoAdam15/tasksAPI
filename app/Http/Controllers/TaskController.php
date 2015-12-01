@@ -63,7 +63,7 @@ class TaskController extends Controller
         if (! $task) {
             return Response::json([
                 'error' => [
-                    'message' => 'Lesson does not exsist'
+                    'message' => 'Task does not exsist'
                 ]
             ], 404);
         }
