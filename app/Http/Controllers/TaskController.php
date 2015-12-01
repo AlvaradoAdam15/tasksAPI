@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Response;
 
 class TaskController extends Controller
 {
@@ -18,7 +19,12 @@ class TaskController extends Controller
     public function index()
     {
         //1. No és retorna: paginació
-        return Task::all();
+        //return Task::all();
+
+        $tasks = Task::all();
+        return Response::json([
+            'data' => $tasks->toArray()
+        ],200);
     }
 
     /**
@@ -52,7 +58,15 @@ class TaskController extends Controller
      */
     public function show($id)
     {
-        return $task = Task::findOrFail($id);
+        $task = Task::find($id);
+
+        if (! $task) {
+            return Response::json([
+                'error' => [
+                    'message' => 'Lesson does not exsist'
+                ]
+            ], 404);
+        }
 
         //or
 
