@@ -9,7 +9,7 @@
 
 namespace Acme\Transformers;
 
-class TaskTransformer extends Tranformer
+class TaskTransformer extends Transformer
 {
     public function transform($task)
     {
