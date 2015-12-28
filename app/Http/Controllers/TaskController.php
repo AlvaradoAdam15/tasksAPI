@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use Acme\Transformers\TaskTransformer;
 use App\Task;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as IlluminateResponse;
+use Illuminate\Support\Facades\Input;
 
 class TaskController extends ApiController
 {
-
     protected $taskTransformer;
-
     /**
      * TaskController constructor.
      * @param $taskTransformer
@@ -18,6 +18,8 @@ class TaskController extends ApiController
     public function __construct(TaskTransformer $taskTransformer)
     {
         $this->taskTransformer = $taskTransformer;
+
+        $this->middleware('auth.basic', ['only' => 'store']);
     }
 
     /**
@@ -31,8 +33,6 @@ class TaskController extends ApiController
         //return Task::all();
 
         $task = Task::all();
-
-
         return $this->respond([
             'data' => $this->taskTransformer->transformCollection($task->all())
         ]);
@@ -51,14 +51,18 @@ class TaskController extends ApiController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store()
     {
-        $task = new Task();
+        if (! Input::get('name') or ! Input::get('done') or ! Input::get('priority'))
+        {
+            return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
+                        ->respondWithError('Parameters failed validation for a task.');
+        }
 
-        $this->saveTask($request, $task);
+        Task::create(Input::all());
+
+        return $this->respondCreated('Task successfully created.');
     }
 
     /**
@@ -72,14 +76,12 @@ class TaskController extends ApiController
         $task = Task::find($id);
 
         if (!$task) {
-
             return $this->respondNotFound('Task does not exsist');
         }
 
         return $this->respond([
             'data' => $this->taskTransformer->transform($task)
         ]);
-        
     }
 
     /**
@@ -103,10 +105,9 @@ class TaskController extends ApiController
     public function update(Request $request, $id)
     {
         $task = Task::finOrFail($id);
-
         $this->saveTask($request, $task);
     }
-
+    
     /**
      * Remove the specified resource from storage.
      *
@@ -117,17 +118,4 @@ class TaskController extends ApiController
     {
         Task::destroy($id);
     }
-
-    /**
-     * @param Request $request
-     * @param $task
-     */
-    public function saveTask(Request $request, $task)
-    {
-        $task->name = $request->name;
-        $task->done = $request->done;
-        $task->priority = $request->priority;
-        $task->save();
-    }
-
 }
