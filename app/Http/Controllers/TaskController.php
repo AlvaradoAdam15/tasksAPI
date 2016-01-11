@@ -107,7 +107,7 @@ class TaskController extends ApiController
         $task = Task::finOrFail($id);
         $this->saveTask($request, $task);
     }
-    
+
     /**
      * Remove the specified resource from storage.
      *
