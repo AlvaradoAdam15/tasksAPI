@@ -15,8 +15,8 @@ class TagTransformer extends Transformer
 {
 
     return [
-        'name' => $tag['name'],
-        'some_bool' => (boolean) $tag['prova'],
+        'title' => $tag['title']
+        //'some_bool' => (boolean) $tag['prova'],
     ];
 }
 }

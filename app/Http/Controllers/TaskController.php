@@ -19,7 +19,7 @@ class TaskController extends ApiController
     {
         $this->taskTransformer = $taskTransformer;
 
-        $this->middleware('auth.basic', ['only' => 'store']);
+        //$this->middleware('auth.basic', ['only' => 'store']);
     }
 
     /**
@@ -33,9 +33,7 @@ class TaskController extends ApiController
         //return Task::all();
 
         $task = Task::all();
-        return $this->respond([
-            'data' => $this->taskTransformer->transformCollection($task->all())
-        ]);
+        return $this->respond($this->taskTransformer->transformCollection($task->all()));
     }
 
     /**
@@ -50,11 +48,11 @@ class TaskController extends ApiController
 
     /**
      * Store a newly created resource in storage.
-     *
+     *  @return \Illuminate\Http\Response
      */
     public function store()
     {
-        if (! Input::get('name') or ! Input::get('done') or ! Input::get('priority'))
+        if (!Input::get('name') or !Input::get('done') or !Input::get('priority'))
         {
             return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
                         ->respondWithError('Parameters failed validation for a task.');
@@ -104,8 +102,17 @@ class TaskController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        $task = Task::finOrFail($id);
-        $this->saveTask($request, $task);
+        $task = Task::find($id);
+
+        if (!$task)
+        {
+            return $this->respondNotFound('Task does not exist!!');
+        }
+
+        $task->name = $request->name;
+        $task->priority = $request->priority;
+        $task->done = $request->done;
+        $task->save();
     }
 
     /**

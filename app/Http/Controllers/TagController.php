@@ -4,12 +4,20 @@ namespace App\Http\Controllers;
 
 use Acme\Transformers\TagTransformer;
 use App\Tag;
+use App\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as IlluminateResponse;
 use Illuminate\Support\Facades\Input;
 
+/**
+ * Class TagController
+ * @package App\Http\Controllers
+ */
 class TagController extends ApiController
 {
+    /**
+     * @var TagTransformer
+     */
     protected $tagTransformer;
     /**
      * TagController constructor.
@@ -19,23 +27,21 @@ class TagController extends ApiController
     {
         $this->tagTransformer = $tagTransformer;
 
-        $this->middleware('auth.basic', ['only' => 'store']);
+        //$this->middleware('auth.basic', ['only' => 'store']);
     }
 
     /**
      * Display a listing of the resource.
-     *
+     * @param null $taskId
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($taskId = null)
     {
         //1. No és retorna: paginació
         //return Tag::all();
 
-        $tag = Tag::all();
-        return $this->respond([
-            'data' => $this->tagTransformer->transformCollection($tag->all())
-        ]);
+        $tag = $this->getTags($taskId);
+        return $this->respond($this->tagTransformer->transformCollection($tag->all()));
     }
 
     /**
@@ -50,19 +56,19 @@ class TagController extends ApiController
 
     /**
      * Store a newly created resource in storage.
-     *
+     *  @return \Illuminate\Http\Response
      */
     public function store()
     {
-        if (! Input::get('name') or ! Input::get('prova'))
+        if (!Input::get('title'))
         {
             return $this->setStatusCode(IlluminateResponse::HTTP_UNPROCESSABLE_ENTITY)
-                ->respondWithError('Parameters failed validation for a tag.');
+                ->respondWithError('Parameters failed validation for a task.');
         }
 
         Tag::create(Input::all());
 
-        return $this->respondCreated('Tag successfully created.');
+        return $this->respondCreated('Task successfully created.');
     }
 
     /**
@@ -104,8 +110,13 @@ class TagController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        $tag = Tag::finOrFail($id);
-        $this->saveTag($request, $tag);
+        $tag = Tag::find($id);
+        if (!$tag)
+        {
+            return $this->respondNotFound('Tag does not exist!');
+        }
+        $tag->title = $request->title;
+        $tag->save();
     }
 
     /**
@@ -118,4 +129,13 @@ class TagController extends ApiController
     {
         Tag::destroy($id);
     }
+
+    /**
+    * @param $taskId
+    * @return \Illuminate\Database\Eloquent\Collection|static[]
+    */
+    public function getTags($taskId)
+     {
+         return $taskId ? Task::findOrFail($taskId)->tags : Tag::all();
+     }
 }

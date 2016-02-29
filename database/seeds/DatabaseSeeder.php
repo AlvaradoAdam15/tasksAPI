@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->seedTasks($faker);
         $this->seedTags($faker);
+        $this->seedTaskTag($faker);
 
         Model::reguard();
     }
@@ -46,9 +47,20 @@ class DatabaseSeeder extends Seeder
         foreach (range(0,100) as $item) {
             $tag = new Tag();
 
-            $tag->name = $faker->word;
-            $tag->prova = $faker->boolean();
+            $tag->title = $faker->word;
+            //$tag->prova = $faker->boolean();
             $tag->save();
+        }
+    }
+
+    private function seedTaskTag($faker)
+    {
+        foreach (range(0,100) as $item)
+        {
+            DB::table('task_tag')->insert([
+                'task_id' => $faker->randomDigit,
+                'tag_id' => $faker->randomDigit
+            ]);
         }
     }
 }

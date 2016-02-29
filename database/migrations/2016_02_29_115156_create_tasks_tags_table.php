@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTagsTable extends Migration
+class CreateTasksTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,14 +12,12 @@ class CreateTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('title');
-            //$table->boolean('prova');
+        Schema::create('task_tag', function (Blueprint $table) {
+            $table->integer('task_id');
+            $table->integer('tag_id');
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      *
@@ -27,6 +25,6 @@ class CreateTagsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('tags');
+        Schema::drop('task_tag');
     }
 }
