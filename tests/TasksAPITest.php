@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 class TasksAPITest extends TestCase
 {
     use DatabaseMigrations;
+
     /**
      * Test tasks is an api then returns JSON
      *
@@ -121,5 +122,14 @@ class TasksAPITest extends TestCase
         $data = [ 'name' => $task->name, 'done' => $task->done , 'priority' => $task->priority];
         $this->delete('/task/' . $task->id)->notSeeInDatabase('tasks',$data);
         $this->get('/task')->dontSeeJson($data)->seeStatusCode(200);
+    }
+    /**
+     * Test tasks when not auth redirect to /auth/login and see message
+     *
+     * @return void
+     */
+    public function testTasksReturnLoginPageWhenNotAuth()
+    {
+        $this->visit('/task')->seePageIs('/auth/login')->see("No tens acces a la API");
     }
 }
