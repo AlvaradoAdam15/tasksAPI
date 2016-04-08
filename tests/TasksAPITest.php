@@ -8,6 +8,7 @@
  */
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 /**
  * Class TasksAPITest
@@ -23,6 +24,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksUseJson()
     {
+        $this->withoutMiddleware();
         $this->get('/task')->seeJson()->seeStatusCode(200);
     }
     /**
@@ -32,6 +34,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksInDatabaseAreListedByAPI()
     {
+        $this->withoutMiddleware();
         $this->createFakeTasks();
         $this->get('/task')
             ->seeJsonStructure([
@@ -48,6 +51,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksReturn404OnTaskNotExsists()
     {
+        $this->withoutMiddleware();
         $this->get('/task/500')->seeJson()->seeStatusCode(404);
     }
 
@@ -58,6 +62,7 @@ class TasksAPITest extends TestCase
      */
     public function testTaskInDatabaseAreShownByAPI()
     {
+        $this->withoutMiddleware();
         $task = $this->createFakeTask();
         $this->get('/task/' . $task->id)
             ->seeJsonContains(['name' => $task->name, 'some_bool' => $task->done, 'priority' => $task->priority ])
@@ -84,6 +89,7 @@ class TasksAPITest extends TestCase
      * @return \App\Task
      */
     private function createFakeTasks($count = 10) {
+        $this->withoutMiddleware();
         foreach (range(0,$count) as $number) {
             $this->createFakeTask();
         }
@@ -95,6 +101,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksCanBePostedAndSavedIntoDatabase()
     {
+        $this->withoutMiddleware();
         $data = ['name' => 'Foobar', 'done' => true, 'priority' => 1];
         $this->post('/task',$data)->seeInDatabase('tasks',$data);
         $this->get('/task')->seeJsonContains(['name' => 'Foobar', 'some_bool' => true, 'priority' => 1])->seeStatusCode(200);
@@ -106,6 +113,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksCanBeUpdatedAndSeeChangesInDatabase()
     {
+        $this->withoutMiddleware();
         $task = $this->createFakeTask();
         $data = [ 'name' => 'Learn Laravel', 'done' => false , 'priority' => 3];
         $this->put('/task/' . $task->id, $data)->seeInDatabase('tasks',$data);
@@ -118,6 +126,7 @@ class TasksAPITest extends TestCase
      */
     public function testTasksCanBeDeletedAndNotSeenOnDatabase()
     {
+        $this->withoutMiddleware();
         $task = $this->createFakeTask();
         $data = [ 'name' => $task->name, 'done' => $task->done , 'priority' => $task->priority];
         $this->delete('/task/' . $task->id)->notSeeInDatabase('tasks',$data);
