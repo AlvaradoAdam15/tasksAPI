@@ -7,12 +7,17 @@
  * Time: 15:43
  */
 use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 class TagsAPITest extends TestCase
 {
 
     use DatabaseMigrations;
+
+    public function createUser()
+    {
+        $user = factory(App\User::class)->create();
+        return $user;
+    }
 
     /**
      * A basic functional test example.
@@ -21,8 +26,8 @@ class TagsAPITest extends TestCase
      */
     public function testTagsUseJson()
     {
-        $this->withoutMiddleware();
-        $this->get('/tag')->seeJson()->seeStatusCode(200);
+        $user = $this->createUser();
+        $this->get('/tag?api_token=' . $user->api_token)->seeJson()->seeStatusCode(200);
     }
 
     /**
@@ -32,9 +37,9 @@ class TagsAPITest extends TestCase
      */
     public function testTagsInDatabaseAreListedByAPI()
     {
-        $this->withoutMiddleware();
+        $user = $this->createUser();
         $this->createFakeTags();
-        $this->get('/tag')
+        $this->actingAs($user)->get('/tag')
             ->seeJsonStructure([
                 '*' => [
                     'title'
@@ -49,8 +54,8 @@ class TagsAPITest extends TestCase
      */
     public function testTagsReturn404OnTaskNotExsists()
     {
-        $this->withoutMiddleware();
-        $this->get('/tag/500')->seeJson()->seeStatusCode(404);
+        $user = $this->createUser();
+        $this->actingAs($user)->get('/tag/500')->seeJson()->seeStatusCode(404);
     }
 
     /**
@@ -60,10 +65,9 @@ class TagsAPITest extends TestCase
      */
     public function testTagsInDatabaseAreShownByAPI()
     {
-        $this->withoutMiddleware();
+        $user = $this->createUser();
         $tag = $this->createFakeTag();
-        $this->get('/tag/' . $tag->id)
-            ->seeJsonContains(['title' => $tag->title])
+        $this->actingAs($user)->get('/tag/' . $tag->id)->seeJsonContains(['title' => $tag->title])
             ->seeStatusCode(200);
     }
 
@@ -102,10 +106,10 @@ class TagsAPITest extends TestCase
      */
     public function testTagsCanBePostedAndSavedIntoDatabase()
     {
-        $this->withoutMiddleware();
+        $user = $this->createUser();
         $data = ['title' => 'Foobar'];
-        $this->post('/tag',$data)->seeInDatabase('tags',$data);
-        $this->get('/tag')->seeJsonContains($data)->seeStatusCode(200);
+        $this->actingAs($user)->post('/tag',$data)->seeInDatabase('tags',$data);
+        $this->actingAs($user)->get('/tag')->seeJsonContains($data)->seeStatusCode(200);
     }
 
     /**
@@ -115,11 +119,11 @@ class TagsAPITest extends TestCase
      */
     public function testTagsCanBeUpdatedAndSeeChangesInDatabase()
     {
-        $this->withoutMiddleware();
+        $user = $this->createUser();
         $tag = $this->createFakeTag();
         $data = [ 'title' => 'Learn Laravel'];
-        $this->put('/tag/' . $tag->id, $data)->seeInDatabase('tags',$data);
-        $this->get('/tag')->seeJsonContains($data)->seeStatusCode(200);
+        $this->actingAs($user)->put('/tag/' . $tag->id, $data)->seeInDatabase('tags',$data);
+        $this->actingAs($user)->get('/tag')->seeJsonContains($data)->seeStatusCode(200);
     }
 
     /**
@@ -129,11 +133,11 @@ class TagsAPITest extends TestCase
      */
     public function testTagsCanBeDeletedAndNotSeenOnDatabase()
     {
-        $this->withoutMiddleware();
+        $user = $this->createUser();
         $tag = $this->createFakeTag();
         $data = [ 'title' => $tag->title];
-        $this->delete('/tag/' . $tag->id)->notSeeInDatabase('tags',$data);
-        $this->get('/tag')->dontSeeJson($data)->seeStatusCode(200);
+        $this->actingAs($user)->delete('/tag/' . $tag->id)->notSeeInDatabase('tags',$data);
+        $this->actingAs($user)->get('/tag')->dontSeeJson($data)->seeStatusCode(200);
     }
 
     /**
