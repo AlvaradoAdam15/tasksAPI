@@ -19,7 +19,7 @@ Route::get('/auth/login', function () {
     return 'No tens acces a la API';
 });
 
-Route::group(['api' => 'api', 'middleware' => 'throttle:5,10'], function () {
+Route::group(['middleware' => 'throttle:5,10'], function () {
     Route::get('task/{id}/tag', 'TagController@index');
     Route::resource('task', 'TaskController');
     Route::resource('tag', 'TagController');
